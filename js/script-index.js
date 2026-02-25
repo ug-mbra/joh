@@ -27,13 +27,12 @@ let allProducts = [];
 let retryCount = 0;
 let categories = new Set();
 let lastLoadTime = null;
-
 // Utility functions
 function formatPrice(price) {
     if (!price || price === '0.00') return 'Free';
     const num = parseFloat(price);
-    if (isNaN(num)) return `$${price}`;
-    return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (isNaN(num)) return `${price}/=`;
+    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatDate(dateString) {
@@ -107,10 +106,16 @@ function updateStatistics(products) {
     let totalSize = 0;
     
     products.forEach(product => {
-        const category = product.context?.custom?.category || 'Uncategorized';
+        // Try multiple possible paths for category
+        const category = product.context?.custom?.category || 
+                        product.context?.category || 
+                        'Uncategorized';
         categorySet.add(category);
         
-        const price = parseFloat(product.context?.custom?.price || 0);
+        // Try multiple possible paths for price
+        const price = parseFloat(product.context?.custom?.price || 
+                               product.context?.price || 
+                               0);
         if (!isNaN(price)) prices.push(price);
         
         totalSize += product.bytes || 0;
@@ -123,13 +128,15 @@ function updateStatistics(products) {
     if (prices.length > 0) {
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
-        priceRangeElement.textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+        priceRangeElement.textContent = `${minPrice.toFixed(2)}/= - ${maxPrice.toFixed(2)}/=`;
     } else {
         priceRangeElement.textContent = 'No prices';
     }
     
     totalSizeElement.textContent = formatBytes(totalSize);
 }
+
+
 
 function createProductCard(product) {
     const context = product.context || {};

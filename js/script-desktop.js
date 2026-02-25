@@ -34,8 +34,8 @@ let useDefaultCategory = true; // Track if we should use default category
 function formatPrice(price) {
     if (!price || price === '0.00') return 'Free';
     const num = parseFloat(price);
-    if (isNaN(num)) return `$${price}`;
-    return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (isNaN(num)) return `${price}/=`;
+    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatDate(dateString) {
@@ -111,6 +111,7 @@ function populateCategoryFilter(categories) {
     }
 }
 
+
 function updateStatistics(products) {
     if (products.length === 0) {
         statsBox.style.display = 'none';
@@ -147,7 +148,7 @@ function updateStatistics(products) {
     if (prices.length > 0) {
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
-        priceRangeElement.textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+        priceRangeElement.textContent = `${minPrice.toFixed(2)}/= - ${maxPrice.toFixed(2)}/=`;
     } else {
         priceRangeElement.textContent = 'No prices';
     }
@@ -155,6 +156,9 @@ function updateStatistics(products) {
     totalSizeElement.textContent = formatBytes(totalSize);
 }
 
+ 
+ 
+ 
 function createProductCard(product) {
     // Try multiple possible paths for product data
     const context = product.context || {};
