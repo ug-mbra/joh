@@ -29,10 +29,10 @@ let categories = new Set();
 let lastLoadTime = null;
 // Utility functions
 function formatPrice(price) {
-    if (!price || price === '0.00') return 'Free';
-    const num = parseFloat(price);
-    if (isNaN(num)) return `${price}/=`;
-    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (!price || price === '0') return 'Free';
+    const num = parseInt(price);
+    if (isNaN(num)) return `${price}`;
+    return `${num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 
 function formatDate(dateString) {
@@ -139,6 +139,7 @@ function updateStatistics(products) {
 
 
 function createProductCard(product) {
+    const WHATSAPP_NUMBER = '256776576547'; // Your WhatsApp number
     const context = product.context || {};
     const name = context.name || 'Unnamed Product';
     const price = formatPrice(context.price);
@@ -152,24 +153,36 @@ function createProductCard(product) {
     // Image URL
     const imageUrl = product.secure_url || product.url || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80';
     
+    
+    // Use public_id or asset_id as unique identifier for the product link
+    const productId = product.public_id || product.asset_id || product.filename;
+    const productPageUrl = `single-product.html?id=${encodeURIComponent(productId)}`;
+    
+    // WhatsApp inquiry URL (direct inquiry without going to single product)
+    const whatsappMessage = `I'm interested in *${name}* (${category}) - ${window.location.origin}/single-product.html?id=${encodeURIComponent(productId)}`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
     // Get file extension for icon
     const fileExt = product.format ? product.format.toLowerCase() : 'jpg';
     
     return `
         <div class="product-card" data-category="${category}" data-price="${parseFloat(context.price || 0)}" data-date="${product.created_at}">
             <div class="product-image">
-                <img src="${imageUrl}" 
-                    alt="${name}" 
-                    loading="lazy"
-                    width="400"
-                    height="300"
-                    onerror="this.src='https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80'">
+                <a href="${productPageUrl}" onclick="event.stopPropagation()">
+                    <img src="${imageUrl}" 
+                        alt="${name}" 
+                        loading="lazy"
+                        width="400"
+                        height="600"
+                        onerror="this.src='https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80'">
+                </a>
                 <span class="product-badge">${category}</span>
             </div>
             <div class="product-content">
                 <div class="product-header">
-                    <h3 class="product-title" title="${name}">${name}</h3>
-                    <span class="product-price">${price}</span>
+                    <h3 class="product-title" title="${name}">
+                        <a href="${productPageUrl}" style="color: inherit; text-decoration: none;">${name}</a>
+                    </h3>
+                    <span class="product-price">${price}/=</span>
                 </div>
                 <p class="product-description">${description}</p>
                 <div class="product-footer">
@@ -181,13 +194,13 @@ function createProductCard(product) {
                     </span>
                 </div>
                 <div class="product-actions">
-                    <a href="${imageUrl}" target="_blank" class="action-btn" title="View full size">
-                        <i class="fas fa-external-link-alt"></i>
+                    <a href="${productPageUrl}" class="action-btn" title="View details">
+                        <i class="fas fa-eye"></i>
                     </a>
-                    <button class="action-btn" onclick="shareProduct('${name}', '${imageUrl}')" title="Share">
+                    <button class="action-btn" onclick="shareProduct('${name}', '${productPageUrl}')" title="Share">
                         <i class="fas fa-share-alt"></i>
                     </button>
-                    <a href="https://wa.me/256776576547?text=I'm%20interested%20in%20${encodeURIComponent(name)}" target="_blank" class="action-btn" title="Buy on WhatsApp">
+                    <a href="${whatsappUrl}" target="_blank" class="action-btn" title="Buy on WhatsApp" style="background: #25D366;">
                         <i class="fab fa-whatsapp"></i>
                     </a>
                 </div>
